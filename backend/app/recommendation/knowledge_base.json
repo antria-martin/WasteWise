@@ -1,0 +1,196 @@
+{
+  "plastic": {
+    "recyclable": true,
+    "recommended_action": "Recycle in Plastic / Dry Waste Bins",
+    "disposal_instructions": [
+      "Empty all contents completely.",
+      "Rinse with clean water to remove residue.",
+      "Remove non-recyclable caps/labels if required by local guidelines.",
+      "Crush or flatten container to save bin space."
+    ],
+    "reuse_ideas": [
+      "Cut plastic bottles to create self-watering seed planters for small herbs.",
+      "Organize small items (desk stationery, screws, buttons) using cut plastic bases.",
+      "Create a bird feeder by inserting wooden spoons through a clean plastic bottle."
+    ],
+    "upcycling_ideas": [
+      "Transform rigid plastic bottles into hanging vertical garden planters.",
+      "Weave plastic bags into durable water-resistant tote bags or outdoor mats.",
+      "Craft decorative desk lamps or pencil holders using colored plastic containers."
+    ],
+    "safety_warnings": [
+      "Do NOT burn plastic items — burning releases toxic dioxins and carcinogens into the air.",
+      "Never re-use single-use plastic bottles (PET #1) for warm or acidic liquids over extended periods."
+    ]
+  },
+  "glass": {
+    "recyclable": true,
+    "recommended_action": "Recycle in Glass Container Bins",
+    "disposal_instructions": [
+      "Empty contents and rinse clean.",
+      "Remove metal lids or plastic caps and recycle them separately.",
+      "Separate colored glass (green, amber) from clear glass if required locally.",
+      "Never mix light bulbs, mirrors, or ceramics with container glass."
+    ],
+    "reuse_ideas": [
+      "Use clean glass jars as food storage containers, spice jars, or beverage glasses.",
+      "Store dry goods (rice, beans, pasta, nuts) in airtight glass jars.",
+      "Use as small flower vases, candle holders, or pencil stands."
+    ],
+    "upcycling_ideas": [
+      "Craft customized painted glass lantern votives using fairy lights.",
+      "Build a decorative terrarium with pebbles, moss, and succulents inside a glass jar.",
+      "Cut glass bottles to make unique drinking glasses or candle holders."
+    ],
+    "safety_warnings": [
+      "Wrap broken glass in thick newspaper or cardboard before disposal to protect sanitation workers.",
+      "Handle sharp edges with heavy-duty protective gloves."
+    ]
+  },
+  "metal": {
+    "recyclable": true,
+    "recommended_action": "Recycle in Metal / Can Recycling Bins",
+    "disposal_instructions": [
+      "Rinse food or beverage residue thoroughly.",
+      "Push sharp tin can lids inside the can or fold edges down safely.",
+      "Clean and ball up aluminum foil (balls larger than 2 inches can be recycled)."
+    ],
+    "reuse_ideas": [
+      "Use clean metal tins as desk organizers, cutlery holders, or paint brush cups.",
+      "Pinch metal pop tabs to create picture frame hanging hooks.",
+      "Use sturdy food cans as small potted plant holders."
+    ],
+    "upcycling_ideas": [
+      "Punch decorative hole patterns into metal cans to create outdoor candle lanterns.",
+      "Construct wind chimes using various metal bottle caps and tin lids.",
+      "Transform larger metal drums or tins into rustic indoor planters."
+    ],
+    "safety_warnings": [
+      "Beware of jagged tin edges when opening or washing metal cans.",
+      "Do not puncture pressurised aerosol cans or expose them to direct heat."
+    ]
+  },
+  "paper": {
+    "recyclable": true,
+    "recommended_action": "Recycle in Paper Recycling Bins",
+    "disposal_instructions": [
+      "Keep paper dry and free from oil, grease, or food stains.",
+      "Remove plastic wrappings, metal spiral binders, and excessive tape.",
+      "Shred sensitive personal documents before recycling."
+    ],
+    "reuse_ideas": [
+      "Use waste paper as protective wrapping material for fragile items when shipping.",
+      "Use blank backs of printed sheets for scratch pads or note taking.",
+      "Compost shredded untreated paper into garden soil."
+    ],
+    "upcycling_ideas": [
+      "Craft handmade recycled paper sheets with embedded dried flower petals.",
+      "Create papier-mâché sculptures, bowls, or decorative masks.",
+      "Fold newspaper into biodegradable seed starter pots for gardening."
+    ],
+    "safety_warnings": [
+      "Soiled paper (e.g. greasy pizza boxes, food wrappers) cannot be recycled and should be composted or disposed of as general waste."
+    ]
+  },
+  "cardboard": {
+    "recyclable": true,
+    "recommended_action": "Flatten & Recycle in Cardboard Bins",
+    "disposal_instructions": [
+      "Flatten all boxes completely to conserve recycling collection space.",
+      "Remove packing peanuts, bubble wrap, and heavy plastic shipping tape.",
+      "Ensure cardboard is dry and free of heavy oil/grease."
+    ],
+    "reuse_ideas": [
+      "Reuse shipping boxes for home storage, moving, or mailing packages.",
+      "Lay flattened cardboard on garden beds as a natural weed barrier/mulch layer.",
+      "Use cardboard sheets as surface protection during DIY painting or craft projects."
+    ],
+    "upcycling_ideas": [
+      "Build creative cardboard playhouses, scratch posts for cats, or toy furniture.",
+      "Construct sturdy drawer organizers or desktop document dividers.",
+      "Craft decorative wall art tiles using woven corrugated cardboard strips."
+    ],
+    "safety_warnings": [
+      "Wet or moldy cardboard must not go into paper recycling streams."
+    ]
+  },
+  "organic": {
+    "recyclable": false,
+    "recommended_action": "Compost in Organic Waste Bin / Garden Compost",
+    "disposal_instructions": [
+      "Separate food waste and organic peels from all plastic packaging.",
+      "Place in dedicated green organic waste bin or home compost pit.",
+      "Keep meat/dairy out of open home compost pits to avoid attracting pests."
+    ],
+    "reuse_ideas": [
+      "Use vegetable scraps (onion skins, carrot ends, celery tops) to simmer homemade broth.",
+      "Use citrus peels to make natural vinegar household cleaning spray.",
+      "Crush dried eggshells into plant soil for a slow-release calcium boost."
+    ],
+    "upcycling_ideas": [
+      "Start a vermicomposting worm bin to produce rich organic fertilizer.",
+      "Use avocado pits or fruit seeds to germinate household houseplants.",
+      "Extract natural plant dyes from onion skins or avocado stones for fabrics."
+    ],
+    "safety_warnings": [
+      "Avoid leaving organic food waste uncovered indoors to prevent fruit flies and bacteria proliferation."
+    ]
+  },
+  "e_waste": {
+    "recyclable": true,
+    "recommended_action": "Take to Certified E-Waste Recycling Drop-Off Center",
+    "disposal_instructions": [
+      "NEVER throw electronic devices into general household trash.",
+      "Perform a factory reset and erase personal data before disposal.",
+      "Remove rechargeable batteries if removable and recycle separately."
+    ],
+    "reuse_ideas": [
+      "Repurpose an old smartphone as a dedicated home security camera or digital desk clock.",
+      "Donate working functional electronics to local schools, charities, or refurbishment non-profits.",
+      "Use old tablet screens as dedicated digital photo frames."
+    ],
+    "upcycling_ideas": [
+      "Repurpose circuit boards into retro jewelry, keychains, or coaster art.",
+      "Turn obsolete computer hard drive platters into decorative mirrors or wind chimes."
+    ],
+    "safety_warnings": [
+      "Do NOT dismantle electronic screens or CRT monitors — they contain hazardous heavy metals like lead and mercury."
+    ]
+  },
+  "hazardous": {
+    "recyclable": false,
+    "recommended_action": "Deliver to Household Hazardous Waste Collection Center",
+    "disposal_instructions": [
+      "Store batteries, chemicals, and medical waste in sealed original containers.",
+      "Keep hazardous materials segregated from all household recyclables.",
+      "Drop off at designated municipal hazardous waste collection points."
+    ],
+    "reuse_ideas": [
+      "Rechargeable batteries should be recharged and reused hundreds of times rather than discarded."
+    ],
+    "upcycling_ideas": [
+      "No upcycling recommended for hazardous items due to chemical safety risks."
+    ],
+    "safety_warnings": [
+      "CRITICAL: Damaged lithium-ion batteries can catch fire or explode if crushed in trash trucks.",
+      "Never incinerate or throw batteries into household fires."
+    ]
+  },
+  "general_waste": {
+    "recyclable": false,
+    "recommended_action": "Dispose in General Landfill Waste Bin",
+    "disposal_instructions": [
+      "Bag residual non-recyclable waste securely before throwing into garbage bin.",
+      "Minimize non-recyclable item consumption by opting for reusable alternatives."
+    ],
+    "reuse_ideas": [
+      "Inspect item to see if any components (like metal fasteners or plastic handles) can be salvaged before discarding."
+    ],
+    "upcycling_ideas": [
+      "Use multi-layer composite waste materials for craft packing insulation if safe."
+    ],
+    "safety_warnings": [
+      "Ensure non-recyclable items do not contaminate clean recycling streams."
+    ]
+  }
+}

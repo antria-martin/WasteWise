@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WasteWise — AI Waste Identification & Sustainability Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --bg-card: rgba(18, 26, 44, 0.75);
+      --bg-card-border: rgba(255, 255, 255, 0.08);
+      --accent-green: #10b981;
+      --accent-cyan: #06b6d4;
+      --accent-emerald: #059669;
+      --accent-warning: #f59e0b;
+      --accent-danger: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, var(--bg-dark) 70%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--bg-card-border);
+      backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(10, 15, 29, 0.85);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--accent-green);
+      -webkit-text-fill-color: var(--accent-green);
+    }
+
+    main {
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 960px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 1.25rem;
+      padding: 1.75rem;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #e2e8f0;
+    }
+
+    /* Dropzone */
+    .dropzone {
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 1rem;
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: rgba(255, 255, 255, 0.02);
+      position: relative;
+    }
+
+    .dropzone:hover, .dropzone.dragover {
+      border-color: var(--accent-green);
+      background: rgba(16, 185, 129, 0.05);
+      transform: translateY(-2px);
+    }
+
+    .dropzone input {
+      display: none;
+    }
+
+    .drop-icon {
+      font-size: 3rem;
+      margin-bottom: 0.75rem;
+      display: block;
+    }
+
+    .drop-text {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .drop-text strong {
+      color: var(--accent-green);
+    }
+
+    /* Preprocessing Controls */
+    .controls-group {
+      margin-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .control-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.875rem;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #334155;
+      transition: .3s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: var(--accent-green);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+
+    /* Image Preview Comparison */
+    .preview-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .preview-box {
+      background: #000;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      aspect-ratio: 1;
+      border: 1px solid var(--bg-card-border);
+      position: relative;
+    }
+
+    .preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .preview-label {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      padding: 0.35rem 0.5rem;
+      font-size: 0.7rem;
+      text-align: center;
+      font-weight: 600;
+      color: #cbd5e1;
+    }
+
+    /* Action button */
+    .btn-analyze {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 0.9rem;
+      border: none;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, var(--accent-green), var(--accent-emerald));
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-analyze:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-analyze:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Results section */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .badge-success { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--accent-warning); border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-danger { background: rgba(239, 68, 68, 0.15); color: var(--accent-danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+
+    .prediction-metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .metric-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid var(--bg-card-border);
+      border-radius: 0.75rem;
+      padding: 1rem;
+    }
+
+    .metric-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+    }
+
+    .metric-value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: capitalize;
+    }
+
+    .confidence-bar {
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+
+    .confidence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-green));
+      width: 0%;
+      transition: width 0.6s ease;
+    }
+
+    /* Tabs */
+    .tabs-header {
+      display: flex;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--bg-card-border);
+      margin-bottom: 1rem;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      color: var(--accent-green);
+      border-bottom-color: var(--accent-green);
+    }
+
+    .tab-content {
+      display: none;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .list-steps {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .list-steps li {
+      position: relative;
+      padding-left: 1.5rem;
+    }
+
+    .list-steps li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    .latency-tag {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 1rem;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span>♻ WasteWise</span>
+      <span class="logo-badge">Dual MobileNetV3 + LLM</span>
+    </div>
+    <div style="font-size: 0.85rem; color: var(--text-muted);">
+      API Host: <strong style="color: #fff;">FastAPI / REST</strong>
+    </div>
+  </header>
+
+  <main>
+    <!-- Left Column: Input & Controls -->
+    <div>
+      <div class="card">
+        <div class="card-title">📷 Capture or Upload Waste Item</div>
+
+        <div class="dropzone" id="dropzone">
+          <input type="file" id="fileInput" accept="image/*">
+          <span class="drop-icon">📸</span>
+          <div class="drop-text">
+            <strong>Click to upload</strong> or drag and drop image<br>
+            <span style="font-size: 0.8rem; opacity: 0.7;">PNG, JPG, WebP supported</span>
+          </div>
+        </div>
+
+        <div class="preview-grid" id="previewGrid" style="display: none;">
+          <div class="preview-box">
+            <img id="rawPreview" src="" alt="Raw Image">
+            <div class="preview-label">Original Photo</div>
+          </div>
+          <div class="preview-box">
+            <img id="processedPreview" src="" alt="Processed Image">
+            <div class="preview-label">Clean Canvas Model Input</div>
+          </div>
+        </div>
+
+        <div class="controls-group">
+          <div class="control-item">
+            <span>Center Square Crop (Fast Clutter Strip)</span>
+            <label class="switch">
+              <input type="checkbox" id="cropSwitch" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="control-item">
+            <span>OpenCV Plain White Background Mask</span>
+            <label class="switch">
+              <input type="checkbox" id="whiteBgSwitch" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="control-item">
+            <span>Lighting & Shadow Equalization</span>
+            <label class="switch">
+              <input type="checkbox" id="lightingSwitch" checked>
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <button class="btn-analyze" id="analyzeBtn" disabled>Run AI Identification & Guidance</button>
+      </div>
+    </div>
+
+    <!-- Right Column: Results & Sustainability Advice -->
+    <div>
+      <div class="card" id="resultsCard">
+        <div class="card-title">💡 Sustainability Diagnosis</div>
+
+        <div id="placeholderState" style="text-align: center; padding: 3rem 1rem; color: var(--text-muted);">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔍</div>
+          Upload a waste item photograph to run dual computer vision classification and generate recommendations.
+        </div>
+
+        <div id="resultsContent" style="display: none;">
+          <div id="statusBadge" class="status-badge badge-success">
+            ✓ Confidently Identified
+          </div>
+
+          <div class="prediction-metrics">
+            <div class="metric-card">
+              <div class="metric-label">Predicted Object</div>
+              <div class="metric-value" id="resObject">--</div>
+              <div class="confidence-bar"><div class="confidence-fill" id="resObjConfFill"></div></div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;" id="resObjConfText">0%</div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-label">Waste Category</div>
+              <div class="metric-value" id="resCategory">--</div>
+              <div class="confidence-bar"><div class="confidence-fill" id="resCatConfFill"></div></div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem;" id="resCatConfText">0%</div>
+            </div>
+          </div>
+
+          <div class="tabs-header">
+            <button class="tab-btn active" onclick="switchTab('recycling')">♻ Recycling & Prep</button>
+            <button class="tab-btn" onclick="switchTab('reuse')">🌱 Reuse Projects</button>
+            <button class="tab-btn" onclick="switchTab('upcycling')">🎨 DIY Upcycling</button>
+            <button class="tab-btn" onclick="switchTab('safety')">⚠️ Safety Precautions</button>
+          </div>
+
+          <div id="tab-recycling" class="tab-content active">
+            <div style="font-weight: 600; color: var(--accent-green); margin-bottom: 0.5rem;" id="resAction">--</div>
+            <ul class="list-steps" id="resDisposalSteps"></ul>
+          </div>
+
+          <div id="tab-reuse" class="tab-content">
+            <ul class="list-steps" id="resReuseIdeas"></ul>
+          </div>
+
+          <div id="tab-upcycling" class="tab-content">
+            <ul class="list-steps" id="resUpcyclingIdeas"></ul>
+          </div>
+
+          <div id="tab-safety" class="tab-content">
+            <ul class="list-steps" id="resSafetyWarnings"></ul>
+          </div>
+
+          <div style="margin-top: 1.5rem; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 0.75rem; font-size: 0.85rem; border-left: 3px solid var(--accent-cyan);" id="resSummary">
+            --
+          </div>
+
+          <div class="latency-tag" id="latencyTag">
+            CV Latency: -- | Total Latency: --
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const previewGrid = document.getElementById('previewGrid');
+    const rawPreview = document.getElementById('rawPreview');
+    const processedPreview = document.getElementById('processedPreview');
+
+    let selectedFile = null;
+
+    dropzone.addEventListener('click', () => fileInput.click());
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragover'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragover'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        rawPreview.src = e.target.result;
+        processedPreview.src = e.target.result;
+        previewGrid.style.display = 'grid';
+        analyzeBtn.disabled = false;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    analyzeBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      analyzeBtn.disabled = true;
+      analyzeBtn.innerText = 'Step 1: Running Model Inference...';
+
+      const formData = new FormData();
+      formData.append('image', selectedFile);
+      formData.append('enable_center_crop', document.getElementById('cropSwitch').checked);
+      formData.append('enable_white_bg', document.getElementById('whiteBgSwitch').checked);
+      formData.append('enable_lighting_norm', document.getElementById('lightingSwitch').checked);
+
+      try {
+        // Step 1: Call /api/predict
+        const predResponse = await fetch('/api/predict', {
+          method: 'POST',
+          body: formData
+        });
+        const predData = await predResponse.json();
+
+        if (predData.preprocessed_preview) {
+          processedPreview.src = predData.preprocessed_preview;
+        }
+
+        renderPredictionResults(predData);
+
+        // Step 2: Only call /api/recommend if compatibility check passes and item is identifiable
+        if (predData.identifiable && predData.compatible) {
+          analyzeBtn.innerText = 'Step 2: Generating Sustainability Recommendations...';
+          
+          const recResponse = await fetch('/api/recommend', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              predicted_object: predData.object,
+              predicted_category: predData.mapped_category,
+              confidence: Math.min(predData.object_confidence || 1.0, predData.category_confidence || 1.0),
+              is_compatible: true
+            })
+          });
+          
+          const recData = await recResponse.json();
+          renderRecommendationResults(recData, predData.latency.cv_latency_ms);
+        } else {
+          renderCompatibilityWarning(predData);
+        }
+
+      } catch (err) {
+        alert('API Call Failed: ' + err.message);
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.innerText = 'Run AI Identification & Guidance';
+      }
+    });
+
+    function renderPredictionResults(data) {
+      document.getElementById('placeholderState').style.display = 'none';
+      document.getElementById('resultsContent').style.display = 'block';
+
+      const badge = document.getElementById('statusBadge');
+      if (!data.identifiable) {
+        badge.className = 'status-badge badge-danger';
+        badge.innerText = '⚠️ Unidentifiable (Low Confidence)';
+      } else if (!data.compatible) {
+        badge.className = 'status-badge badge-warning';
+        badge.innerText = '⚠️ Model Disagreement Notice';
+      } else {
+        badge.className = 'status-badge badge-success';
+        badge.innerText = '✓ Verified Identification';
+      }
+
+      document.getElementById('resObject').innerText = (data.object || 'Uncertain').replace(/_/g, ' ');
+      document.getElementById('resCategory').innerText = (data.category || 'Uncertain').replace(/_/g, ' ');
+
+      const objConf = Math.round((data.object_confidence || 0) * 100);
+      const catConf = Math.round((data.category_confidence || 0) * 100);
+
+      document.getElementById('resObjConfFill').style.width = objConf + '%';
+      document.getElementById('resObjConfText').innerText = objConf + '% confidence';
+      document.getElementById('resCatConfFill').style.width = catConf + '%';
+      document.getElementById('resCatConfText').innerText = catConf + '% confidence';
+
+      document.getElementById('latencyTag').innerText = `CV Latency: ${data.latency.cv_latency_ms}ms`;
+    }
+
+    function renderRecommendationResults(recData, cvLatency) {
+      const rec = recData.recommendation || {};
+      document.getElementById('resAction').innerText = rec.recommended_action || 'Follow general recycling guidance';
+      
+      populateList('resDisposalSteps', rec.disposal_instructions || []);
+      populateList('resReuseIdeas', rec.reuse_ideas || []);
+      populateList('resUpcyclingIdeas', rec.upcycling_ideas || []);
+      populateList('resSafetyWarnings', rec.safety_warnings || []);
+
+      document.getElementById('resSummary').innerText = rec.summary || 'Recommendation generated successfully.';
+      
+      const recLatency = recData.latency ? recData.latency.recommendation_latency_ms : 0;
+      document.getElementById('latencyTag').innerText = 
+        `CV Latency: ${cvLatency}ms | LLM Latency: ${recLatency}ms | Total: ${(cvLatency + recLatency).toFixed(2)}ms`;
+    }
+
+    function renderCompatibilityWarning(data) {
+      document.getElementById('resAction').innerText = data.message;
+      populateList('resDisposalSteps', ['Ensure image is well lit.', 'Focus closely on the waste item.', 'Avoid busy backgrounds.']);
+      populateList('resReuseIdeas', ['N/A - Item verification failed.']);
+      populateList('resUpcyclingIdeas', ['N/A - Item verification failed.']);
+      populateList('resSafetyWarnings', ['Exercise caution when handling unknown waste items.']);
+      document.getElementById('resSummary').innerText = data.message;
+    }
+
+    function populateList(elementId, items) {
+      const el = document.getElementById(elementId);
+      el.innerHTML = items.map(item => `<li>${item}</li>`).join('') || '<li>No specific items provided.</li>';
+    }
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tabName}`).classList.add('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+plastic_bottle
+plastic_bag
+plastic_container
+plastic_cup
+glass_bottle
+glass_jar
+metal_can
+metal_container
+cardboard_box
+newspaper
+paper_cup
+food_waste
+battery
+mobile_phone
+laptop
+general_trash

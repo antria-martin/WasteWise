@@ -44,3 +44,10 @@ example
 
 # VS Code local history
 .history/
+
+# Python generated files
+__pycache__/
+*.pyc
+
+# Backend secrets
+backend/app/config.py
