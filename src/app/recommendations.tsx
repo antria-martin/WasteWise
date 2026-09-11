@@ -1,9 +1,57 @@
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import {
+  getRecommendations,
+  RecommendationResult,
+} from "@/services/recommendationApi";
+
 export default function RecommendationsScreen() {
   const router = useRouter();
+
+  const { object, category, confidence } = useLocalSearchParams<{
+    object: string;
+    category: string;
+    confidence: string;
+  }>();
+
+  const [recommendations, setRecommendations] =
+    useState<RecommendationResult | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!object || !category || !confidence) {
+      setError("Prediction information is missing.");
+      setLoading(false);
+      return;
+    }
+
+    const fetchRecommendations = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const result = await getRecommendations(
+          object,
+          category,
+          Number(confidence),
+        );
+
+        setRecommendations(result);
+      } catch (err) {
+        console.error("Recommendation error:", err);
+        setError("Unable to load recommendations.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecommendations();
+  }, [object, category, confidence]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -14,54 +62,102 @@ export default function RecommendationsScreen() {
       >
         <Text style={styles.title}>What should I do?</Text>
 
-        {/* Recommended Action */}
+        {/* Loading */}
+        {loading && (
+          <View style={styles.card}>
+            <Text style={styles.loadingText}>
+              🔄 Preparing recommendations...
+            </Text>
+          </View>
+        )}
 
-        <View style={styles.card}>
-          <Text style={styles.icon}>♻️</Text>
+        {/* Error */}
+        {!loading && error && (
+          <View style={styles.warningCard}>
+            <Text style={styles.cardTitle}>⚠️ Recommendations Unavailable</Text>
 
-          <Text style={styles.cardTitle}>Recycle</Text>
+            <Text style={styles.description}>{error}</Text>
+          </View>
+        )}
 
-          <Text style={styles.description}>
-            Empty, rinse and dry the plastic bottle before placing it in the
-            appropriate recycling stream.
-          </Text>
-        </View>
+        {/* Recommendations */}
+        {!loading && recommendations && (
+          <>
+            {/* Recommended Action */}
+            <View style={styles.actionCard}>
+              <Text style={styles.icon}>🌱</Text>
 
-        {/* Reuse */}
+              <Text style={styles.cardTitle}>Recommended Action</Text>
 
-        <View style={styles.card}>
-          <Text style={styles.icon}>🌱</Text>
+              <Text style={styles.actionText}>
+                {recommendations.recommended_action}
+              </Text>
+            </View>
 
-          <Text style={styles.cardTitle}>Reuse</Text>
+            {/* Recycling */}
+            <View style={styles.card}>
+              <Text style={styles.icon}>♻️</Text>
 
-          <Text style={styles.description}>
-            Use the bottle as a small plant pot or storage container.
-          </Text>
-        </View>
+              <Text style={styles.cardTitle}>Recycle</Text>
 
-        {/* Upcycling */}
+              <Text style={styles.description}>
+                {recommendations.recycling}
+              </Text>
+            </View>
 
-        <View style={styles.card}>
-          <Text style={styles.icon}>💡</Text>
+            {/* Disposal */}
+            <View style={styles.card}>
+              <Text style={styles.icon}>🗑️</Text>
 
-          <Text style={styles.cardTitle}>Upcycle</Text>
+              <Text style={styles.cardTitle}>Disposal</Text>
 
-          <Text style={styles.description}>
-            Turn the bottle into a hanging planter or creative storage
-            container.
-          </Text>
-        </View>
+              <Text style={styles.description}>{recommendations.disposal}</Text>
+            </View>
 
-        {/* Warning */}
+            {/* Reuse */}
+            <View style={styles.card}>
+              <Text style={styles.icon}>🌱</Text>
 
-        <View style={styles.warningCard}>
-          <Text style={styles.icon}>⚠️</Text>
+              <Text style={styles.cardTitle}>Reuse</Text>
 
-          <Text style={styles.cardTitle}>Safety</Text>
+              {recommendations.reuse.map((item, index) => (
+                <Text key={index} style={styles.listItem}>
+                  • {item}
+                </Text>
+              ))}
+            </View>
 
-          <Text style={styles.description}>Do not burn plastic.</Text>
-        </View>
+            {/* Upcycling */}
+            <View style={styles.card}>
+              <Text style={styles.icon}>💡</Text>
 
+              <Text style={styles.cardTitle}>Upcycle</Text>
+
+              {recommendations.upcycling.map((item, index) => (
+                <Text key={index} style={styles.listItem}>
+                  • {item}
+                </Text>
+              ))}
+            </View>
+
+            {/* Safety */}
+            {recommendations.warnings.length > 0 && (
+              <View style={styles.warningCard}>
+                <Text style={styles.icon}>⚠️</Text>
+
+                <Text style={styles.cardTitle}>Safety</Text>
+
+                {recommendations.warnings.map((warning, index) => (
+                  <Text key={index} style={styles.listItem}>
+                    • {warning}
+                  </Text>
+                ))}
+              </View>
+            )}
+          </>
+        )}
+
+        {/* Back / Scan Again */}
         <Pressable
           style={styles.camButton}
           onPress={() => router.replace("/camera")}
@@ -90,14 +186,22 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 30,
+    fontSize: 28,
     fontWeight: "bold",
     color: "#1B5E20",
-    marginBottom: 24,
+    marginBottom: 20,
   },
 
   card: {
     backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 22,
+    marginBottom: 16,
+    elevation: 3,
+  },
+
+  actionCard: {
+    backgroundColor: "#E8F5E9",
     borderRadius: 18,
     padding: 22,
     marginBottom: 16,
@@ -109,25 +213,44 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 22,
     marginBottom: 16,
-    elevation: 2,
   },
 
   icon: {
-    fontSize: 32,
-    marginBottom: 8,
+    fontSize: 30,
+    marginBottom: 10,
   },
 
   cardTitle: {
-    fontSize: 22,
+    fontSize: 21,
     fontWeight: "bold",
     color: "#222",
     marginBottom: 8,
   },
 
+  actionText: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#2E7D32",
+  },
+
   description: {
     fontSize: 16,
-    lineHeight: 24,
     color: "#555",
+    lineHeight: 24,
+  },
+
+  listItem: {
+    fontSize: 16,
+    color: "#555",
+    lineHeight: 25,
+    marginBottom: 4,
+  },
+
+  loadingText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#2E7D32",
+    textAlign: "center",
   },
 
   camButton: {

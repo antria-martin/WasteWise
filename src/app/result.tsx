@@ -1,5 +1,8 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+
+import { PredictionResult, predictWaste } from "@/services/predictionApi";
 
 export default function ResultScreen() {
   const router = useRouter();
@@ -8,30 +11,175 @@ export default function ResultScreen() {
     image: string;
   }>();
 
+  const [prediction, setPrediction] = useState<PredictionResult | null>(null);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!image) {
+      setError("No image was provided.");
+      setLoading(false);
+      return;
+    }
+
+    const runPrediction = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const result = await predictWaste(image);
+
+        setPrediction(result);
+      } catch (err) {
+        console.error("Prediction error:", err);
+        setError("Unable to identify the waste item.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    runPrediction();
+  }, [image]);
+
+  const formatLabel = (value: string | null) => {
+    if (!value) return "Unknown";
+
+    return value
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Waste Identified</Text>
+      <Text style={styles.title}>Waste Identification</Text>
 
       {image && <Image source={{ uri: image }} style={styles.image} />}
 
-      <View style={styles.resultCard}>
-        <Text style={styles.itemName}>Plastic Bottle</Text>
-
-        <Text style={styles.category}>Category: Plastic</Text>
-
-        <View style={styles.confidenceContainer}>
-          <Text style={styles.confidenceLabel}>Confidence</Text>
-
-          <Text style={styles.confidence}>94%</Text>
+      {/* Loading */}
+      {loading && (
+        <View style={styles.resultCard}>
+          <Text style={styles.loadingText}>🔄 Analyzing waste...</Text>
         </View>
-      </View>
+      )}
 
-      <Pressable
-        style={styles.recommendButton}
-        onPress={() => router.push("/recommendations")}
-      >
-        <Text style={styles.buttonText}>View Recommendations →</Text>
-      </Pressable>
+      {/* API / Network Error */}
+      {!loading && error && (
+        <>
+          <View style={styles.errorCard}>
+            <Text style={styles.errorTitle}>⚠️ Identification Failed</Text>
+
+            <Text style={styles.errorText}>{error}</Text>
+          </View>
+
+          <Pressable
+            style={styles.backButton}
+            onPress={() => router.replace("/")}
+          >
+            <Text style={styles.buttonText}>← Scan Another Item</Text>
+          </Pressable>
+        </>
+      )}
+
+      {/* Prediction received */}
+      {!loading && !error && prediction && (
+        <>
+          {/* Unidentifiable */}
+          {!prediction.identifiable && (
+            <>
+              <View style={styles.errorCard}>
+                <Text style={styles.errorTitle}>
+                  ⚠️ Item Could Not Be Identified
+                </Text>
+
+                <Text style={styles.errorText}>
+                  {prediction.message ??
+                    "The item could not be identified confidently. Please upload a clearer image or ensure that the image contains a trash item."}
+                </Text>
+              </View>
+
+              <Pressable
+                style={styles.backButton}
+                onPress={() => router.replace("/")}
+              >
+                <Text style={styles.buttonText}>← Scan Another Item</Text>
+              </Pressable>
+            </>
+          )}
+
+          {/* Identifiable prediction */}
+          {prediction.identifiable && (
+            <>
+              <View style={styles.resultCard}>
+                <Text style={styles.itemName}>
+                  {formatLabel(prediction.object)}
+                </Text>
+
+                <Text style={styles.category}>
+                  Waste Category: {formatLabel(prediction.category)}
+                </Text>
+
+                <View style={styles.confidenceRow}>
+                  <Text style={styles.confidenceLabel}>Object Confidence</Text>
+
+                  <Text style={styles.confidence}>
+                    {Math.round(prediction.object_confidence * 100)}%
+                  </Text>
+                </View>
+
+                <View style={styles.confidenceRow}>
+                  <Text style={styles.confidenceLabel}>
+                    Category Confidence
+                  </Text>
+
+                  <Text style={styles.confidence}>
+                    {Math.round(prediction.category_confidence * 100)}%
+                  </Text>
+                </View>
+
+                <View style={styles.consistencyContainer}>
+                  <Text style={styles.consistencyLabel}>Model Consistency</Text>
+
+                  <Text style={styles.consistency}>
+                    {prediction.consistent ? "✓ Consistent" : "⚠ Inconsistent"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Only allow recommendations when models agree */}
+              {prediction.consistent ? (
+                <Pressable
+                  style={styles.recommendButton}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/recommendations",
+                      params: {
+                        object: prediction.object ?? "",
+                        category:
+                          prediction.mapped_category ??
+                          prediction.category ??
+                          "",
+                        confidence: prediction.object_confidence.toString(),
+                      },
+                    })
+                  }
+                >
+                  <Text style={styles.buttonText}>View Recommendations →</Text>
+                </Pressable>
+              ) : (
+                <View style={styles.warningCard}>
+                  <Text style={styles.warningTitle}>⚠️ Model Disagreement</Text>
+
+                  <Text style={styles.warningText}>
+                    The identified object and waste category do not match.
+                    Please try another image for a more reliable recommendation.
+                  </Text>
+                </View>
+              )}
+            </>
+          )}
+        </>
+      )}
     </View>
   );
 }
@@ -78,10 +226,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
 
-  confidenceContainer: {
+  confidenceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    marginBottom: 14,
   },
 
   confidenceLabel: {
@@ -90,12 +239,86 @@ const styles = StyleSheet.create({
   },
 
   confidence: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "bold",
     color: "#2E7D32",
   },
 
+  consistencyContainer: {
+    borderTopWidth: 1,
+    borderTopColor: "#E0E0E0",
+    paddingTop: 14,
+    marginTop: 4,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+
+  consistencyLabel: {
+    fontSize: 16,
+    color: "#666",
+  },
+
+  consistency: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#2E7D32",
+  },
+
+  loadingText: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#2E7D32",
+    textAlign: "center",
+  },
+
+  errorCard: {
+    backgroundColor: "#FFF8E1",
+    borderRadius: 18,
+    padding: 22,
+  },
+
+  errorTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#8A5A00",
+    marginBottom: 8,
+  },
+
+  errorText: {
+    fontSize: 16,
+    color: "#555",
+    lineHeight: 24,
+  },
+
+  warningCard: {
+    backgroundColor: "#FFF8E1",
+    borderRadius: 18,
+    padding: 22,
+    marginTop: 24,
+  },
+
+  warningTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#8A5A00",
+    marginBottom: 8,
+  },
+
+  warningText: {
+    fontSize: 16,
+    color: "#555",
+    lineHeight: 24,
+  },
+
   recommendButton: {
+    backgroundColor: "#2E7D32",
+    padding: 18,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 24,
+  },
+
+  backButton: {
     backgroundColor: "#2E7D32",
     padding: 18,
     borderRadius: 14,
