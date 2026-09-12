@@ -31,7 +31,12 @@ yarn-error.*
 *.pem
 
 # local env files
-.env*.local
+.env
+.env.*
+!.env.example
+backend/.env
+backend/.env.*
+!backend/.env.example
 
 # typescript
 *.tsbuildinfo
@@ -50,4 +55,4 @@ __pycache__/
 *.pyc
 
 # Backend secrets
-backend/app/config.py
+backend/app/*.secret.py

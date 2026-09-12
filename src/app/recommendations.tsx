@@ -44,7 +44,11 @@ export default function RecommendationsScreen() {
         setRecommendations(result);
       } catch (err) {
         console.error("Recommendation error:", err);
-        setError("Unable to load recommendations.");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to load recommendations.",
+        );
       } finally {
         setLoading(false);
       }
@@ -91,6 +95,12 @@ export default function RecommendationsScreen() {
 
               <Text style={styles.actionText}>
                 {recommendations.recommended_action}
+              </Text>
+
+              <Text style={styles.sourceText}>
+                {recommendations.llm_enhanced
+                  ? "Gemini-enhanced guidance"
+                  : "Knowledge base guidance"}
               </Text>
             </View>
 
@@ -231,6 +241,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "600",
     color: "#2E7D32",
+  },
+
+  sourceText: {
+    fontSize: 13,
+    color: "#666",
+    marginTop: 8,
   },
 
   description: {

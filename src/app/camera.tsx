@@ -1,4 +1,5 @@
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
+import * as FileSystem from "expo-file-system/legacy";
 import { useRouter } from "expo-router";
 import { useRef, useState } from "react";
 import {
@@ -10,6 +11,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { clearCapturedImageUri, setCapturedImageUri } from "../services/capturedImage";
 
 export default function CameraScreen() {
   const insets = useSafeAreaInsets();
@@ -18,7 +20,6 @@ export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
 
   const [facing, setFacing] = useState<CameraType>("back");
-
   const [photo, setPhoto] = useState<string | null>(null);
 
   const cameraRef = useRef<CameraView>(null);
@@ -61,12 +62,9 @@ export default function CameraScreen() {
           <TouchableOpacity
             style={styles.useButton}
             onPress={() => {
-              router.push({
-                pathname: "/result",
-                params: {
-                  image: photo,
-                },
-              });
+              setCapturedImageUri(photo);
+
+              router.push("/result");
             }}
           >
             <Text style={styles.buttonText}>✓ Use Photo</Text>
@@ -106,11 +104,8 @@ export default function CameraScreen() {
           <Text style={styles.instructionsTitle}>For best results</Text>
 
           <Text style={styles.instruction}>✓ One waste item only</Text>
-
           <Text style={styles.instruction}>✓ No hands or other objects</Text>
-
           <Text style={styles.instruction}>✓ Use a clear background</Text>
-
           <Text style={styles.instruction}>✓ Keep the entire item visible</Text>
         </View>
       </View>
@@ -124,10 +119,41 @@ export default function CameraScreen() {
               return;
             }
 
-            const capturedPhoto = await cameraRef.current.takePictureAsync();
+            try {
+              const capturedPhoto = await cameraRef.current.takePictureAsync();
 
-            if (capturedPhoto?.uri) {
-              setPhoto(capturedPhoto.uri);
+              if (!capturedPhoto?.uri) {
+                return;
+              }
+
+              console.log("CAPTURED CAMERA URI:", capturedPhoto.uri);
+
+              /*
+               * Create a new file in Expo's cache directory.
+               * This gives us a normal file URI that can be passed
+               * to the prediction uploader later.
+               */
+              const filename = `waste_${Date.now()}.jpg`;
+              const destination = `${FileSystem.cacheDirectory}${filename}`;
+
+              console.log("DESTINATION URI:", destination);
+
+              await FileSystem.copyAsync({
+                from: capturedPhoto.uri,
+                to: destination,
+              });
+
+              const fileInfo = await FileSystem.getInfoAsync(destination);
+
+              console.log("COPIED FILE INFO:", fileInfo);
+
+              if (!fileInfo.exists) {
+                throw new Error("Captured image could not be saved.");
+              }
+
+              setPhoto(destination);
+            } catch (error) {
+              console.error("PHOTO SAVE ERROR:", error);
             }
           }}
         >
@@ -157,10 +183,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  /*
-   * Guidance overlay sits above the camera.
-   * It does not interfere with camera interaction.
-   */
   overlay: {
     position: "absolute",
     top: 0,

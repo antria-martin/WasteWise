@@ -1,58 +1,75 @@
-const API_BASE_URL =
-  process.env.EXPO_PUBLIC_PREDICT_API_URL ?? "";
+import * as FileSystem from "expo-file-system/legacy";
+import { getApiUrl } from "./apiConfig";
 
-const PREDICT_ENDPOINT = "/predict";
-const IMAGE_FIELD_NAME = "image";
+const PREDICT_ENDPOINT = "/api/predict";
+
+export type TopPrediction = {
+  object: string;
+  category: string;
+  confidence: number;
+};
 
 export type PredictionResult = {
   identifiable: boolean;
   object: string | null;
-  object_confidence: number;
   category: string | null;
-  category_confidence: number;
-  mapped_category: string | null;
-  consistent: boolean;
+  confidence: number;
   message?: string;
+  top_k_predictions: TopPrediction[];
+  latency?: {
+    cv_latency_ms?: number;
+  };
+  preprocessed_preview?: string;
 };
 
 export async function predictWaste(
-  imageUri: string
+  imageUri: string,
 ): Promise<PredictionResult> {
-  const formData = new FormData();
+  console.log("IMAGE URI:", imageUri);
 
-  formData.append(
-    IMAGE_FIELD_NAME,
+  // Upload the camera file directly.
+  const result = await FileSystem.uploadAsync(
+    getApiUrl(PREDICT_ENDPOINT),
+    imageUri,
     {
-      uri: imageUri,
-      name: "waste.jpg",
-      type: "image/jpeg",
-    } as any
+      httpMethod: "POST",
+      uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+      fieldName: "image",
+      mimeType: "image/jpeg",
+    },
   );
 
-  const response = await fetch(
-    `${API_BASE_URL}${PREDICT_ENDPOINT}`,
-    {
-      method: "POST",
-      body: formData,
+  console.log("UPLOAD STATUS:", result.status);
+  console.log("UPLOAD RESPONSE:", result.body);
+
+  if (result.status < 200 || result.status >= 300) {
+    let message = "Prediction failed.";
+
+    try {
+      const data = JSON.parse(result.body);
+
+      if (typeof data?.detail === "string") {
+        message = data.detail;
+      }
+    } catch {
+      // Keep default message.
     }
-  );
 
-  if (!response.ok) {
-    throw new Error(
-      `Prediction API failed with status ${response.status}`
-    );
+    throw new Error(`${message} Status: ${result.status}`);
   }
 
-  const data = await response.json();
+  const data = JSON.parse(result.body);
 
   return {
-    identifiable: data.identifiable,
-    object: data.object,
-    object_confidence: data.object_confidence,
-    category: data.category,
-    category_confidence: data.category_confidence,
-    mapped_category: data.mapped_category,
-    consistent: data.consistent,
+    identifiable: Boolean(data.identifiable),
+    object: data.object ?? null,
+    category: data.category ?? null,
+    confidence: Number(data.confidence ?? 0),
     message: data.message,
+    top_k_predictions: Array.isArray(data.top_k_predictions)
+      ? data.top_k_predictions
+      : [],
+    latency: data.latency,
+    preprocessed_preview: data.preprocessed_preview,
   };
 }

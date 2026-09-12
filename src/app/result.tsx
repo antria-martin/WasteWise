@@ -1,46 +1,55 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
+import { getCapturedImageUri } from "@/services/capturedImage";
 import { PredictionResult, predictWaste } from "@/services/predictionApi";
 
 export default function ResultScreen() {
   const router = useRouter();
 
-  const { image } = useLocalSearchParams<{
-    image: string;
-  }>();
-
+  const [imageUri, setImageUri] = useState<string | null>(null);
   const [prediction, setPrediction] = useState<PredictionResult | null>(null);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!image) {
+    const uri = getCapturedImageUri();
+
+    console.log("RESULT IMAGE URI:", uri);
+
+    if (!uri) {
       setError("No image was provided.");
       setLoading(false);
       return;
     }
+
+    setImageUri(uri);
 
     const runPrediction = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const result = await predictWaste(image);
+        const result = await predictWaste(uri);
 
         setPrediction(result);
       } catch (err) {
         console.error("Prediction error:", err);
-        setError("Unable to identify the waste item.");
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Unable to identify the waste item.",
+        );
       } finally {
         setLoading(false);
       }
     };
 
     runPrediction();
-  }, [image]);
+  }, []);
 
   const formatLabel = (value: string | null) => {
     if (!value) return "Unknown";
@@ -54,12 +63,12 @@ export default function ResultScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Waste Identification</Text>
 
-      {image && <Image source={{ uri: image }} style={styles.image} />}
+      {imageUri && <Image source={{ uri: imageUri }} style={styles.image} />}
 
       {/* Loading */}
       {loading && (
         <View style={styles.resultCard}>
-          <Text style={styles.loadingText}>🔄 Analyzing waste...</Text>
+          <Text style={styles.loadingText}>Analyzing waste...</Text>
         </View>
       )}
 
@@ -67,7 +76,7 @@ export default function ResultScreen() {
       {!loading && error && (
         <>
           <View style={styles.errorCard}>
-            <Text style={styles.errorTitle}>⚠️ Identification Failed</Text>
+            <Text style={styles.errorTitle}>Identification Failed</Text>
 
             <Text style={styles.errorText}>{error}</Text>
           </View>
@@ -76,7 +85,7 @@ export default function ResultScreen() {
             style={styles.backButton}
             onPress={() => router.replace("/")}
           >
-            <Text style={styles.buttonText}>← Scan Another Item</Text>
+            <Text style={styles.buttonText}>Scan Another Item</Text>
           </Pressable>
         </>
       )}
@@ -89,7 +98,7 @@ export default function ResultScreen() {
             <>
               <View style={styles.errorCard}>
                 <Text style={styles.errorTitle}>
-                  ⚠️ Item Could Not Be Identified
+                  Item Could Not Be Identified
                 </Text>
 
                 <Text style={styles.errorText}>
@@ -102,7 +111,7 @@ export default function ResultScreen() {
                 style={styles.backButton}
                 onPress={() => router.replace("/")}
               >
-                <Text style={styles.buttonText}>← Scan Another Item</Text>
+                <Text style={styles.buttonText}>Scan Another Item</Text>
               </Pressable>
             </>
           )}
@@ -120,62 +129,35 @@ export default function ResultScreen() {
                 </Text>
 
                 <View style={styles.confidenceRow}>
-                  <Text style={styles.confidenceLabel}>Object Confidence</Text>
+                  <Text style={styles.confidenceLabel}>Model Confidence</Text>
 
                   <Text style={styles.confidence}>
-                    {Math.round(prediction.object_confidence * 100)}%
-                  </Text>
-                </View>
-
-                <View style={styles.confidenceRow}>
-                  <Text style={styles.confidenceLabel}>
-                    Category Confidence
-                  </Text>
-
-                  <Text style={styles.confidence}>
-                    {Math.round(prediction.category_confidence * 100)}%
+                    {Math.round(prediction.confidence * 100)}%
                   </Text>
                 </View>
 
                 <View style={styles.consistencyContainer}>
-                  <Text style={styles.consistencyLabel}>Model Consistency</Text>
+                  <Text style={styles.consistencyLabel}>Identification</Text>
 
-                  <Text style={styles.consistency}>
-                    {prediction.consistent ? "✓ Consistent" : "⚠ Inconsistent"}
-                  </Text>
+                  <Text style={styles.consistency}>Verified</Text>
                 </View>
               </View>
 
-              {/* Only allow recommendations when models agree */}
-              {prediction.consistent ? (
-                <Pressable
-                  style={styles.recommendButton}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/recommendations",
-                      params: {
-                        object: prediction.object ?? "",
-                        category:
-                          prediction.mapped_category ??
-                          prediction.category ??
-                          "",
-                        confidence: prediction.object_confidence.toString(),
-                      },
-                    })
-                  }
-                >
-                  <Text style={styles.buttonText}>View Recommendations →</Text>
-                </Pressable>
-              ) : (
-                <View style={styles.warningCard}>
-                  <Text style={styles.warningTitle}>⚠️ Model Disagreement</Text>
-
-                  <Text style={styles.warningText}>
-                    The identified object and waste category do not match.
-                    Please try another image for a more reliable recommendation.
-                  </Text>
-                </View>
-              )}
+              <Pressable
+                style={styles.recommendButton}
+                onPress={() =>
+                  router.push({
+                    pathname: "/recommendations",
+                    params: {
+                      object: prediction.object ?? "",
+                      category: prediction.category ?? "",
+                      confidence: prediction.confidence.toString(),
+                    },
+                  })
+                }
+              >
+                <Text style={styles.buttonText}>View Recommendations</Text>
+              </Pressable>
             </>
           )}
         </>
