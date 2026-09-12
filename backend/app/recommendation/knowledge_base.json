@@ -192,5 +192,27 @@
     "safety_warnings": [
       "Ensure non-recyclable items do not contaminate clean recycling streams."
     ]
+  },
+  "medical": {
+    "recyclable": false,
+    "recommended_action": "Dispose in Designated Medical / Bio-Hazard Waste Bin",
+    "disposal_instructions": [
+      "Never mix medical waste (gloves, masks, syringes, medicines) with general household recycling.",
+      "Place used masks and gloves in a sealed bag before discarding.",
+      "Return unused or expired medicines to a pharmacy take-back programme.",
+      "Dispose of syringes in a puncture-resistant sharps container — NEVER loose in trash bags."
+    ],
+    "reuse_ideas": [
+      "Single-use medical items (gloves, syringes, masks) must NOT be reused for health and safety reasons."
+    ],
+    "upcycling_ideas": [
+      "No upcycling recommended for medical waste due to contamination and biohazard risks."
+    ],
+    "safety_warnings": [
+      "CRITICAL: Syringes and sharp medical items can cause needle-stick injuries — always use a sharps container.",
+      "Used PPE (gloves, masks) may harbour pathogens — seal in a bag and leave for 72 hours before handling if COVID-19 is a concern.",
+      "Never flush medicines down the toilet — they contaminate water supplies."
+    ]
   }
 }
+

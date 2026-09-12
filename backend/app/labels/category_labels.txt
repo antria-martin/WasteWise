@@ -1,9 +1,0 @@
-cardboard
-general_waste
-glass
-hazardous
-metal
-organic
-paper
-plastic
-

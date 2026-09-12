@@ -30,7 +30,6 @@ class LLMRecommendationEngine:
         predicted_object: str,
         predicted_category: str,
         confidence: float,
-        is_compatible: bool
     ) -> Dict[str, Any]:
         """
         Combines verified knowledge base facts with LLM synthesis to produce
@@ -53,16 +52,6 @@ class LLMRecommendationEngine:
             "llm_enhanced": False
         }
 
-        # If predictions mismatch or low confidence, adjust message
-        if not is_compatible:
-            fallback_response["summary"] = (
-                f"Prediction notice: Item identified as '{predicted_object.replace('_', ' ')}', "
-                f"which shows variance with category '{predicted_category}'. "
-                f"Please verify or follow general {predicted_category} disposal guidelines."
-            )
-            return fallback_response
-
-        # If Gemini client is active, attempt dynamic LLM enhancement
         if self.client is not None:
             try:
                 prompt = f"""

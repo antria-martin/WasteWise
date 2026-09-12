@@ -18,21 +18,17 @@ def init_recommend_services():
 class RecommendRequest(BaseModel):
     predicted_object: str = Field(
         ..., 
-        description="Verified item label from prediction endpoint (e.g. 'plastic_bottle')"
+        description="Verified item label from prediction endpoint (e.g. 'plastic_bottles')"
     )
     predicted_category: str = Field(
         ..., 
-        description="Verified waste category label from prediction endpoint (e.g. 'plastic')"
+        description="Verified waste category from prediction endpoint (e.g. 'plastic')"
     )
     confidence: float = Field(
         default=1.0, 
         ge=0.0, 
         le=1.0, 
-        description="Minimum prediction confidence score"
-    )
-    is_compatible: bool = Field(
-        default=True, 
-        description="Flag indicating whether object and category passed compatibility check"
+        description="Prediction confidence score from the model"
     )
 
 @router.post("/recommend")
@@ -52,7 +48,6 @@ async def get_sustainability_recommendation(payload: RecommendRequest):
             predicted_object=payload.predicted_object,
             predicted_category=payload.predicted_category,
             confidence=payload.confidence,
-            is_compatible=payload.is_compatible
         )
         
         t_end = time.time()

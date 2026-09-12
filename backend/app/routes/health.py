@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.config import CONFIDENCE_THRESHOLD, OBJECT_MODEL_PATH, CATEGORY_MODEL_PATH
+from app.config import CONFIDENCE_THRESHOLD, MODEL_PATH, INFERENCE_BUNDLE_PATH
 
 router = APIRouter()
 
@@ -10,7 +10,7 @@ def health_check():
         "service": "WasteWise AI Backend",
         "confidence_threshold": CONFIDENCE_THRESHOLD,
         "models": {
-            "object_model_present": OBJECT_MODEL_PATH.exists(),
-            "category_model_present": CATEGORY_MODEL_PATH.exists()
+            "model_present": MODEL_PATH.exists(),
+            "inference_bundle_present": INFERENCE_BUNDLE_PATH.exists(),
         }
     }

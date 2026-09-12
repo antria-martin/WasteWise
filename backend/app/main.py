@@ -10,11 +10,11 @@ from app.routes.health import router as health_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: load model interpreters once in memory
+    # Startup: load single PyTorch waste classifier + LLM recommendation engine
     print("Starting WasteWise FastAPI Backend Service...")
     init_services()
     init_recommend_services()
-    print("Inference interpreters and recommendation engines initialized.")
+    print("WasteClassifier and recommendation engine initialized.")
     yield
     # Shutdown: clean up
     print("Shutting down WasteWise service...")
